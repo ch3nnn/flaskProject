@@ -16,8 +16,6 @@ from app.common.result_code import ResultCode
 
 class CustomErrorHandler(BasicErrorHandler, ABC):
 
-    msg = list()
-
     def __init__(self, tree=None, custom_messages=None):
         super(CustomErrorHandler, self).__init__(tree)
         self.custom_messages = custom_messages or {}
@@ -61,6 +59,7 @@ class Validate:
             requests = request.values()
         except TypeError:
             requests = request.get_json()
+            requests = requests if requests else {}
 
         if name not in requests:
             requests[name] = default
@@ -70,7 +69,7 @@ class Validate:
         return {"error": v.errors}
 
 
-def validator(name, rules, default=""):
+def validator(name, method, rules, default=""):
     """验证装饰器
 
     :param name: 字段名
@@ -81,22 +80,16 @@ def validator(name, rules, default=""):
     def wrappar(func):
         @wraps(func)
         def inner_wrappar(*args, **kwargs):
-            error = Validate.validateInputByName(name, {name: rules}, '', default)
-            if 'error' in error:
-                Validate.errors.append(error)
-            if 'params' in kwargs.keys():
-                kwargs['params'][name] = error[name]
-                kwargs = kwargs['params']
-            else:
-                kwargs = error
-            response = func(kwargs)
-            if Validate.errors:
-                import copy
-                errors = copy.deepcopy(Validate.errors)
-                Validate.errors = list()
-                return ResultCode.error(str(errors))
-            Validate.errors = list()
-            return response
+            if request.method in method:
+                error = Validate.validateInputByName(name, {name: rules}, '', default)
+                if 'error' in error:
+                    return ResultCode.error(msg=str(error))
+                if 'params' in kwargs.keys():
+                    kwargs['params'][name] = error[name]
+                    kwargs = kwargs['params']
+                else:
+                    kwargs = error
+            return func(kwargs)
 
         return inner_wrappar
 

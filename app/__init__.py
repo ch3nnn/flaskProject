@@ -8,10 +8,12 @@
 # from flask_permissions.core import Permissions
 
 import logging
+import traceback
 from logging.handlers import RotatingFileHandler
 
 from flask import Flask, jsonify
 from flask_caching import Cache
+from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 
 from config import config_dict
@@ -20,8 +22,7 @@ from config import config_dict
 db = SQLAlchemy()
 cache = Cache()
 
-# 定义redis_store
-redis_store = None
+login_manager = LoginManager()
 
 
 # 工厂方法,根据不同的参数,创建不同环境下的app对象
@@ -40,14 +41,27 @@ def create_app(config_name):
     # 初始化组件
     db.init_app(app)
     cache.init_app(app)
+    login_manager.init_app(app)
+
+    login_manager.login_view = 'passport.login'
+    login_manager.login_message = u'请登录以访问此页面'
+
+    @login_manager.user_loader
+    def load_user(user_id):
+        from app.passport.models import User
+        user = User.query.get(int(user_id))
+        return user
 
     # 注册首页蓝图对象
-    from app.views.demo import demo
-    app.register_blueprint(demo)
+    from app.passport.views import passport
+    app.register_blueprint(passport)  # 注册登录
 
     # 全局异常捕获
     @app.errorhandler(Exception)
     def error_handler(e):
+        # 记录错误信息
+        app.logger.error(traceback.format_exc())
+
         data = {
             "code": 0,
             "msg": str(e),

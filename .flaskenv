@@ -1,3 +1,7 @@
+# 环境变量参数
+
+SECRET_KEY = "fdERGj56474562vd!@%*v!2"
+
 FLASK_APP = "run"
 FLASK_ENV = "development"
 

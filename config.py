@@ -12,6 +12,8 @@ import os
 class Config(object):
     DEBUG = True
 
+    SECRET_KEY = os.getenv('SECRET_KEY', 'dev key')
+
     # 数据库配置
     MYSQL_HOST = os.environ.get('FLASK_MYSQL_HOST') or "localhost"
     MYSQL_PORT = os.environ.get('FLASK_MYSQL_PORT') or "3306"
