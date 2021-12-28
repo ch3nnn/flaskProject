@@ -18,8 +18,8 @@ class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(255), unique=True, nullable=False, comment="用户名")
     password = db.Column(db.String(255), unique=True, nullable=False, comment="密码")
-    created = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, comment="创建时间")
-    updated = db.Column(db.DateTime, onupdate=datetime.utcnow, default=datetime.utcnow, comment="更新时间")
+    create_time = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, comment="创建时间")
+    update_time = db.Column(db.DateTime, onupdate=datetime.utcnow, default=datetime.utcnow, comment="更新时间")
 
     # 设置密码
     @staticmethod

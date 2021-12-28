@@ -32,7 +32,7 @@ class Config(object):
     CACHE_REDIS_DB = 0
 
     # 默认日志等级
-    LEVEL = logging.DEBUG
+    LEVEL = logging.ERROR
 
 
 # 开发模式
